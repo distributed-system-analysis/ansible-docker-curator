@@ -1,0 +1,19 @@
+---
+- hosts: test
+  user: root
+  roles:
+  - role: dochang.docker 
+  vars:
+  - files_dir: "{{ FILES_DIR|default('/tmp/curator/file') }}"
+  tasks:
+    - name: create config.yaml and rules directory
+      file: path=/tmp/curator state=directory
+      file: path=/tmp/curator/file state=touch
+    - name: copy service files to systemd
+      copy: src=/etc/systemd/system/curator.timer dest=/etc/systemd/system/
+      copy: src=/etc/systemd/system/curator.service dest=/etc/systemd/system/
+    - name: pull the image
+      shell: docker pull nael4746/curator
+    - name: run the container
+      shell: docker run -d --name=curator -v "{{ files_dir }}":/opt/file nael4746/curator
+     
